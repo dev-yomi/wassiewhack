@@ -671,7 +671,7 @@
 
     // Function to handle the button click
     function whack() {
-      //var gifUrl = "media/wassKill.gif";
+      //var gifUrl = "./media/wassKill.gif";
       //document.getElementById("gif").src = gifUrl;
       var gasPrice = web3.utils.toWei('0.001', 'ether');
       // Call the whack function of the contract
@@ -681,7 +681,7 @@
       var gifUrl = "./media/wassKill.gif";
       document.getElementById("gif").src = gifUrl;
     } else {
-      document.getElementById("gif").src = "media/wasskill1.png";
+      document.getElementById("gif").src = "./media/wasskill1.png";
     }
   });
     }
@@ -744,13 +744,13 @@
     \__/     \__|\__|  \__| \_______| \_______|\__|  \__|       \_______|      \__/     \__| \_______|\_______/ \_______/ \__| \_______|
                                                                                                                     created by @yomidev_
     </pre>
-  <img id="gif" src="media/wasskill1.png">
+  <img id="gif" src="./media/wasskill1.png">
   <br>
   <br>
   <br>
   <button id="Btn"class="btn" onclick="whack()">[WHACK_WASSIE]</button>
   <script>
-    var sound = new Audio("media/explosion.wav");
+    var sound = new Audio("./media/explosion.wav");
     var gif = document.getElementById("gif");
     gif.addEventListener("load", function(){
     sound.play();
