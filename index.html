@@ -69,16 +69,17 @@
     color: rgb(9, 255, 0);
   }</style>
   <script>
-    // Connect to the Ethereum network
-    if (typeof window.ethereum !== 'undefined' || (typeof window.web3 !== 'undefined')) {
-    // Web3 browser user detected. You can now use the provider.
-    let provider = window['ethereum'] || window.web3.givenProvider;
-    web3 = new Web3(provider);
-    } else {
-    console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
-    }
 
-  let userAddress = "";
+const web3 = new Web3(Web3.givenProvider);
+
+if(typeof window.ethereum !== "undefined"){
+  console.log("We see metamask!");
+  const accounts = ethereum.request({ method: 'eth_requestAccounts' });
+  const account = accounts[0];
+  console.log(account);
+}
+
+    let userAddress = "";
 
   web3.eth.getAccounts().then(function(accounts) {
   userAddress = accounts[0];
@@ -712,7 +713,7 @@
     
     // Function to get the user's current score
     async function getMyScore() {
-      await contract.methods.score(userAddress).call().then(function(result) {
+      contract.methods.score(userAddress).call().then(function(result) {
         document.getElementById("myScore").innerHTML = "USER_CURRENT_SCORE: "+result;
       });
     }
