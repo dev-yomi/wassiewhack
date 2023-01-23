@@ -69,16 +69,14 @@
     color: rgb(9, 255, 0);
   }</style>
   <script>
-window.addEventListener('load', async () => {
     // Connect to the Ethereum network
     if (typeof window.ethereum !== 'undefined' || (typeof window.web3 !== 'undefined')) {
     // Web3 browser user detected. You can now use the provider.
     let provider = window['ethereum'] || window.web3.currentProvider;
-    const web3 = new Web3(provider);
+    web3 = new Web3(provider);
     } else {
     console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
     }
-});
 
     let userAddress = "";
 
