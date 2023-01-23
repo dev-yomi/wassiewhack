@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.1/dist/web3.min.js"></script>
+  <style>body {
+    background-color: #000000;
+    font-family: monospace;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    color: rgb(0, 255, 0);
+  }
+  
+  .container {
+    margin: 40px auto;
+    text-align: center;
+    color: rgb(3, 249, 3);
+    overflow-x: hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: monospace;
+    font-weight: bold;
+  }
+
+  p {
+    color: rgb(255, 0, 0);
+  }
+  .form-control {
+    margin-bottom: 10px;
+  }
+  
+  .form-group {
+    margin-bottom: 30px;
+  }
+
+  input[type="text"]
+{
+    background: transparent;
+    border: none;
+    color: rgb(0, 255, 0);
+    text-align: center;
+}
+  
+  .btn {
+    color: rgb(21, 255, 0);
+    padding: 12px 20px;
+    border: rgb(0, 0, 0);
+    cursor: pointer;
+    width: 10%;
+    opacity: 0.9;
+  }
+  
+  .btn:hover {
+    opacity: 1;
+  }
+  
+  .score {
+    margin-top: 30px;
+    font-size: 18px;
+    color: rgb(3, 249, 3);
+  }
+
+  .highest-score {
+    margin-top: 30px;
+    font-size: 18px;
+    color: rgb(9, 255, 0);
+  }</style>
+  <script>
+    // Connect to the Ethereum network
+    if (typeof window.ethereum !== 'undefined' || (typeof window.web3 !== 'undefined')) {
+    // Web3 browser user detected. You can now use the provider.
+    let provider = window['ethereum'] || window.web3.currentProvider;
+    web3 = new Web3(provider);
+    } else {
+    console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+    }
+
+    let userAddress = "";
+
+    web3.eth.getAccounts().then(function(accounts) {
+  userAddress = accounts[0];
+  console.log(userAddress);
+    });
+    // The address of the contract
+    var contractAddress = "0xa76bdf5a9c9a1b57be1863992f18e6b69ee013d0";
+    
+    // The ABI of the contract
+    var contractABI = [
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
+			}
+		],
+		"name": "Approval",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "approve",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "claimReward",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "subtractedValue",
+				"type": "uint256"
+			}
+		],
+		"name": "decreaseAllowance",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "addedValue",
+				"type": "uint256"
+			}
+		],
+		"name": "increaseAllowance",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "previousOwner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "renounceOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_newPrice",
+				"type": "uint256"
+			}
+		],
+		"name": "setPrice",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_target",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_amount",
+				"type": "uint256"
+			}
+		],
+		"name": "steal",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "transfer",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
+			}
+		],
+		"name": "Transfer",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "transferFrom",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "whack",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			}
+		],
+		"name": "allowance",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "balanceOf",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "decimals",
+		"outputs": [
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "devAddress",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getHighestScore",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getTotalRewarded",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			}
+		],
+		"name": "getUsertrophies",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "hasClaimed",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "highestScore",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "name",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "previousRecordHolder",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "price",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "recordHolder",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "score",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "symbol",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalKills",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalRewarded",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalSupply",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "userTrophies",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "number",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+
+    // Create the contract object
+    var contract = new web3.eth.Contract(contractABI, contractAddress);
+
+    // Function to handle the button click
+    function whack() {
+      //var gifUrl = "./media/wassKill.gif";
+      //document.getElementById("gif").src = gifUrl;
+      var gasPrice = web3.utils.toWei('0.001', 'ether');
+      // Call the whack function of the contract
+      contract.methods.whack().send({from: userAddress, value: gasPrice}).then(function(receipt) {
+    // Check if the transaction was successful
+    if (receipt.status) {
+      var gifUrl = "./media/wassKill.gif";
+      document.getElementById("gif").src = gifUrl;
+    } else {
+      document.getElementById("gif").src = "./media/wasskill1.png";
+    }
+  });
+    }
+
+    function claim() {
+      // Call the claim function of the contract
+      contract.methods.claimReward().send({from: userAddress}).then(function(result) {
+        console.log(result);
+      });
+    }
+    
+    function steal(){
+      var stealToAddress = document.getElementById("stealToAddress").value;
+      var stealAmount = document.getElementById("stealAmount").value;
+      var gasPrice = web3.utils.toWei(stealAmount*0.0001,'ether');
+      contract.methods.steal(stealToAddress,stealAmount).send({from: userAddress, value: gasPrice}).then(function(result) {
+        console.log(result);
+      });
+    }
+    
+    // Function to get the highest score and the address that holds it
+    function getHighestScore() {
+      contract.methods.getHighestScore().call().then(function(result) {
+        document.getElementById("highestScore").innerHTML = "CURRENT_HIGHSCORE: "+result[0];
+        document.getElementById("highestScoreHolder").innerHTML = "HIGHSCORE_HOLDER: "+ result[1];
+      });
+    }
+    
+    // Function to get the user's current score
+    async function getMyScore() {
+      let accounts = await web3.eth.getAccounts()
+      contract.methods.score(accounts[0]).call().then(function(result) {
+        document.getElementById("myScore").innerHTML = "USER_CURRENT_SCORE: "+result;
+      });
+    }
+    // Function to display the highest score and the address that holds it on load
+    async function displayHighestScore() {
+      await getHighestScore()
+    }
+    // Function to display the user's current score on load
+    async function displayMyScore() {
+      await getMyScore()
+    }
+    window.onload = function(){
+        displayHighestScore();
+        displayMyScore();
+    }
+  </script>
+</head>
+<body>
+    <pre class="container" >                                                                                                                                                                                                                                                                    
+                                                                                                                                                                
+    $$\      $$\ $$\                           $$\                             $$\      $$\                               $$\           
+    $$ | $\  $$ |$$ |                          $$ |                            $$ | $\  $$ |                              \__|          
+    $$ |$$$\ $$ |$$$$$$$\   $$$$$$\   $$$$$$$\ $$ |  $$\        $$$$$$\        $$ |$$$\ $$ | $$$$$$\   $$$$$$$\  $$$$$$$\ $$\  $$$$$$\  
+    $$ $$ $$\$$ |$$  __$$\  \____$$\ $$  _____|$$ | $$  |       \____$$\       $$ $$ $$\$$ | \____$$\ $$  _____|$$  _____|$$ |$$  __$$\ 
+    $$$$  _$$$$ |$$ |  $$ | $$$$$$$ |$$ /      $$$$$$  /        $$$$$$$ |      $$$$  _$$$$ | $$$$$$$ |\$$$$$$\  \$$$$$$\  $$ |$$$$$$$$ |
+    $$$  / \$$$ |$$ |  $$ |$$  __$$ |$$ |      $$  _$$<        $$  __$$ |      $$$  / \$$$ |$$  __$$ | \____$$\  \____$$\ $$ |$$   ____|
+    $$  /   \$$ |$$ |  $$ |\$$$$$$$ |\$$$$$$$\ $$ | \$$\       \$$$$$$$ |      $$  /   \$$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |$$ |\$$$$$$$\ 
+    \__/     \__|\__|  \__| \_______| \_______|\__|  \__|       \_______|      \__/     \__| \_______|\_______/ \_______/ \__| \_______|
+                                                                                                                    created by @yomidev_
+    </pre>
+  <img id="gif" src="./media/wasskill1.png">
+  <br>
+  <br>
+  <br>
+  <button id="Btn"class="btn" onclick="whack()">[WHACK_WASSIE]</button>
+  <script>
+    var sound = new Audio("./media/explosion.wav");
+    var gif = document.getElementById("gif");
+    gif.addEventListener("load", function(){
+    sound.play();
+});
+</script>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <div id="highestScore"></div>
+  <div class="p" class="container" id="highestScoreHolder"></div>
+  <br>
+  <br>
+  <div id="myScore"></div>
+  <br>
+  <br>
+  <div type="text">steal_points</div>
+  <input type="text" id="stealToAddress" placeholder="input target address">
+  <br>
+  <input type="text" id="stealAmount" placeholder="input theft amount">
+  <br>
+  <button class="btn" onclick="steal()">[STEAL]</button>
+  <br>
+  <br>
+  <button class="btn" onclick="claim()">[CLAIM_REWARD]</button>
+  <br>
+  <pre class="container" >
+    _____________________________________________
+
+    ALWAYS WANTED TO WHACK A WASSIE? NOW YOU CAN!
+
+Proof of Wassie is a game, an idea, a joke, an exploration 
+of game theory and wassie extermination.
+
+This game has been built to help you, yes YOU, eliminate wassies 
+like never before!
+
+The rules are simple:
+1) Call the whack() function to remotely, securely and viciously 
+eliminate a wassie in our advanced facility, deep underground 
+  just North of [redacted]!
+    -* This will cost you 0.001 Ethereum, as well as gas! *-
+2) Our proprietary [redacted] technology will digitally deliver 
+the remains of the wassie YOU just assassinated directly 
+to your wallet!
+3) Upon delivery, our in-house accounting team will 
+increment your score by 1!
+
+
+Wassie Remains cannot be created ANY other way!
+
+That's the basics!
+
+In order to incentivise and further facilitate complete wassie 
+genocide we are keeping the score of every user who assists in the cause!
+Whoever holds the highest score ("Record Holder") is able to call 
+the claimReward() function at any time - this will reward them with 10% of the contract funds!
+However, if someone were to gain a higher score BEFORE the other user 
+can claim the reward, the window of opportunity is closed and the reward cannot be claimed.
+A user MUST currently have the highest score in order to claim the reward.
+Additionally, the claimReward() function can only be called ONCE PER RECORD 
+by a Record Holder. This means that once a reward is claimed, the Record Holder
+must allow another user to attain the highestScore in order to reset their claim status.
+
+We will also be inscribing our digital [redacted] tablets with a record of every 
+user who attains the highest score, and the block they achieved it on!
+So, if you become a Record Holder (even if you don't claim the reward), you will 
+be immortalised in our annals of wassie destruction as a true wassie slayer!
+
+You might have noticed the steal() function. This is a side business operated by 
+unknown shadow entities in the accounting department. Likely a result of 
+the [redacted] incident.
+You can *bribe* these accountants to cook the books for you, letting 
+you steal another user's score!
+
+To do this, they require: 0.0001 ETH per 1 Wassie Remains.
+They then use their patented [redacted] technology to reorganise the books in your favour!
+Keep in mind: You are only able to steal from those with a higher score than yourself!
+They will deduct score from your target and award score to you! 
+Keeping everything balanced, in case of any pesky auditors!
+
+We here at Wassie Eradication and Internment Co. hope you enjoy utilising our unique services!
+  </pre>
+</body>
+</html>
