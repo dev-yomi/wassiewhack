@@ -712,7 +712,7 @@
     
     // Function to get the user's current score
     async function getMyScore() {
-      contract.methods.score(userAddress).call().then(function(result) {
+      await contract.methods.score(userAddress).call().then(function(result) {
         document.getElementById("myScore").innerHTML = "USER_CURRENT_SCORE: "+result;
       });
     }
