@@ -80,23 +80,17 @@
   }</style>
   <script>
 
-const web3 = new Web3(Web3.givenProvider);
 
-let userAddress;
-
-if (window.ethereum) {
-  window.ethereum.enable().then(function(accounts) {
+async function getAddress(){
+	await web3.eth.getAccounts().then(function(accounts) {
     userAddress = accounts[0];
-    console.log(userAddress);
+    //console.log(userAddress);
   });
-} else {
-  console.log("Non-Ethereum browser detected. You should consider trying MetaMask!");
+  return userAddress;
 }
-    // The address of the contract
-    var contractAddress = "0xa76bdf5a9c9a1b57be1863992f18e6b69ee013d0";
-    
-    // The ABI of the contract
-    var contractABI = [
+
+ // The ABI of the contract
+ var contractABI = [
 	{
 		"inputs": [],
 		"stateMutability": "nonpayable",
@@ -674,8 +668,35 @@ if (window.ethereum) {
 	}
 ];
 
+const web3 = new Web3(Web3.givenProvider);
+
+let userAddress;
+let contractAddress;
+let chainType;
+
+if (window.ethereum) {
+  window.ethereum.enable().then(function(accounts) {
+    userAddress = accounts[0];
+    console.log(userAddress);
+  });
+}
+
+async function getChain(){
+	chainType = await web3.eth.getChainId();
+	console.log("CHAIN TYPE IS: "+ chainType);
+	return chainType;
+}
+
+if(getChain() === 1){
+	contractAddress = '0xa76bdf5a9c9a1b57be1863992f18e6b69ee013d0';
     // Create the contract object
     var contract = new web3.eth.Contract(contractABI, contractAddress);
+	}else {
+	contractAddress = '0x37750B83c441a146401f1524A74bF4fb6e8724CB';
+	console.log("CANTO")
+    // Create the contract object
+    var contract = new web3.eth.Contract(contractABI, contractAddress);
+	}
 
     // Function to handle the button click
     function whack() {
@@ -735,6 +756,7 @@ if (window.ethereum) {
     window.onload = function(){
         displayHighestScore();
         displayMyScore();
+		getChain();
     }
   </script>
 </head>
